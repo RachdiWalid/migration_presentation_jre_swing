@@ -1,0 +1,3051 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pré-étude Architecture SIGEDAV — Smartpoint</title>
+    <style>
+      /* ── SMARTPOINT BRAND TOKENS ── */
+      :root {
+        --sp-dark: #0b0036;
+        --sp-dark2: #1a0f4a;
+        --sp-card: #2a204d;
+        --sp-lime: #b6dd10;
+        --sp-lime2: #c8ee2a;
+        --sp-grey: #f4f4f4;
+        --sp-grey2: #e8e8e2;
+        --sp-text: #1a1a30;
+        --sp-muted: #6b6b90;
+        --sp-white: #ffffff;
+        --sp-border: #e0dff0;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: var(--sp-grey);
+        color: var(--sp-text);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      code {
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        background: #ece9f8;
+        padding: 1px 5px;
+        border-radius: 3px;
+        color: var(--sp-dark);
+      }
+      a {
+        color: var(--sp-dark);
+        text-decoration: none;
+      }
+
+      /* ── TOPBAR ── */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 300;
+        background: var(--sp-dark);
+        border-bottom: 2px solid var(--sp-lime);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        height: 52px;
+      }
+      .tb-logo img {
+        height: 28px;
+        display: block;
+      }
+      .tb-meta {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
+        letter-spacing: 0.04em;
+      }
+      .tb-right {
+        display: flex;
+        gap: 8px;
+      }
+      .tbtn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 13px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: transparent;
+        color: rgba(255, 255, 255, 0.8);
+        transition: all 0.15s;
+        letter-spacing: 0.02em;
+      }
+      .tbtn:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .tbtn-lime {
+        background: var(--sp-lime);
+        border-color: var(--sp-lime);
+        color: var(--sp-dark);
+      }
+      .tbtn-lime:hover {
+        background: var(--sp-lime2);
+      }
+
+      /* ── PAGE ── */
+      .page-wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 0 0 80px;
+      }
+
+      /* ── COVER ── */
+      .cover {
+        background: var(--sp-dark);
+        position: relative;
+        overflow: hidden;
+        padding: 60px 52px 52px;
+      }
+      .cover-glow {
+        position: absolute;
+        top: -80px;
+        right: -80px;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(182, 221, 16, 0.12) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .cover-glow2 {
+        position: absolute;
+        bottom: -60px;
+        left: 100px;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(182, 221, 16, 0.07) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .cover-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--sp-lime);
+        margin-bottom: 18px;
+      }
+      .cover-eyebrow::before {
+        content: "";
+        display: block;
+        width: 28px;
+        height: 2px;
+        background: var(--sp-lime);
+        border-radius: 1px;
+      }
+      .cover-h1 {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--sp-white);
+        line-height: 1.2;
+        margin-bottom: 8px;
+      }
+      .cover-h1 span {
+        color: var(--sp-lime);
+      }
+      .cover-sub {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 36px;
+        max-width: 600px;
+        line-height: 1.7;
+      }
+      .cover-stripe {
+        height: 3px;
+        background: linear-gradient(90deg, var(--sp-lime), transparent);
+        border-radius: 2px;
+        margin-bottom: 32px;
+        width: 120px;
+      }
+      .cover-meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .cm-item {
+        padding: 14px 18px;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .cm-item:last-child {
+        border-right: none;
+      }
+      .cm-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--sp-lime);
+        margin-bottom: 4px;
+      }
+      .cm-value {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.85);
+        font-weight: 500;
+      }
+
+      /* ── TOC ── */
+      .toc {
+        background: var(--sp-dark2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 28px 52px;
+      }
+      .toc-title {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--sp-lime);
+        margin-bottom: 14px;
+      }
+      .toc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+      }
+      .toc-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: background 0.12s;
+      }
+      .toc-item:hover {
+        background: rgba(182, 221, 16, 0.08);
+      }
+      .toc-num {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--sp-lime);
+        width: 18px;
+        flex-shrink: 0;
+      }
+      .toc-lbl {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      /* ── SECTION ── */
+      .section {
+        padding: 40px 52px;
+        background: var(--sp-white);
+        border-bottom: 1px solid var(--sp-border);
+        margin-bottom: 3px;
+      }
+      .section:nth-child(even) {
+        background: #fafaf8;
+      }
+      .s-num {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        background: var(--sp-dark);
+        color: var(--sp-lime);
+        padding: 3px 10px;
+        border-radius: 4px;
+        margin-bottom: 11px;
+      }
+      .s-h1 {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--sp-dark);
+        margin-bottom: 6px;
+        line-height: 1.3;
+      }
+      .s-intro {
+        font-size: 13px;
+        color: var(--sp-muted);
+        margin-bottom: 24px;
+        max-width: 700px;
+        line-height: 1.7;
+      }
+
+      /* ── SUBSECTION ── */
+      .sub-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--sp-dark);
+        margin-bottom: 11px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .sub-title::before {
+        content: "";
+        display: block;
+        width: 3px;
+        height: 15px;
+        background: var(--sp-lime);
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
+      .subsection {
+        margin-bottom: 24px;
+      }
+
+      /* ── GRIDS ── */
+      .g2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .g3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+      .g4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      /* ── CARDS ── */
+      .card {
+        background: var(--sp-white);
+        border: 1px solid var(--sp-border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .card-dark {
+        background: var(--sp-dark);
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .card-head {
+        padding: 10px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        border-bottom: 1px solid var(--sp-border);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .card-head-dark {
+        padding: 10px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--sp-lime);
+      }
+      .card-body {
+        padding: 14px;
+      }
+      .card-body-dark {
+        padding: 14px;
+      }
+
+      /* ── BADGE ── */
+      .badge {
+        display: inline-flex;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+        gap: 3px;
+        letter-spacing: 0.02em;
+      }
+      .b-lime {
+        background: var(--sp-lime);
+        color: var(--sp-dark);
+      }
+      .b-dark {
+        background: var(--sp-dark);
+        color: var(--sp-lime);
+      }
+      .b-green {
+        background: #e1f5ee;
+        color: #085041;
+      }
+      .b-red {
+        background: #fcebeb;
+        color: #791f1f;
+      }
+      .b-amber {
+        background: #fff3cd;
+        color: #7a4f00;
+      }
+      .b-blue {
+        background: #e6f1fb;
+        color: #0c447c;
+      }
+      .b-purple {
+        background: #eeedfe;
+        color: #3c3489;
+      }
+      .b-grey {
+        background: #f0efe8;
+        color: #6b6b66;
+      }
+
+      /* ── BULLET LIST ── */
+      .blist {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .blist li {
+        font-size: 12px;
+        color: var(--sp-text);
+        display: flex;
+        align-items: start;
+        gap: 8px;
+        line-height: 1.55;
+      }
+      .blist li::before {
+        content: "→";
+        color: var(--sp-lime);
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+      .blist.check li::before {
+        content: "✓";
+        color: #0f6e56;
+      }
+      .blist.cross li::before {
+        content: "✗";
+        color: #c0392b;
+      }
+      .blist.warn li::before {
+        content: "⚠";
+        color: #ba7517;
+      }
+      .blist.dot li::before {
+        content: "•";
+        color: var(--sp-muted);
+      }
+      .blist-dark li {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* ── KPI ── */
+      .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 22px;
+      }
+      .kpi {
+        background: var(--sp-dark);
+        border-radius: 10px;
+        padding: 16px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .kpi::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--sp-lime);
+      }
+      .kpi-num {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--sp-lime);
+        margin-bottom: 3px;
+      }
+      .kpi-lbl {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.4;
+      }
+
+      /* ── LAYER TABLE ── */
+      .layer-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--sp-border);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--sp-white);
+        margin-bottom: 16px;
+      }
+      .layer-table th {
+        padding: 10px 13px;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: left;
+        background: var(--sp-dark);
+        color: var(--sp-lime);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .layer-table td {
+        padding: 9px 13px;
+        font-size: 12px;
+        border-bottom: 1px solid #f1f0f8;
+        vertical-align: top;
+        line-height: 1.5;
+      }
+      .layer-table tr:last-child td {
+        border-bottom: none;
+      }
+      .layer-table tr:hover td {
+        background: #f8f8fc;
+      }
+      .sw {
+        display: inline-block;
+        font-size: 10px;
+        background: #fcebeb;
+        color: #791f1f;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-family: "Courier New", monospace;
+        font-weight: 600;
+      }
+      .fl {
+        display: inline-block;
+        font-size: 10px;
+        background: var(--sp-lime);
+        color: var(--sp-dark);
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-family: "Courier New", monospace;
+        font-weight: 700;
+      }
+
+      /* ── ARCHI STACK ── */
+      .archi-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        border: 1px solid var(--sp-border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .archi-layer {
+        display: grid;
+        grid-template-columns: 130px 1fr;
+        border-bottom: 1px solid var(--sp-border);
+      }
+      .archi-layer:last-child {
+        border-bottom: none;
+      }
+      .al-label {
+        padding: 16px 12px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        background: var(--sp-dark);
+        color: var(--sp-lime);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1.5;
+        border-right: none;
+      }
+      .al-content {
+        padding: 14px 18px;
+        background: var(--sp-white);
+      }
+      .al-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--sp-dark);
+        margin-bottom: 4px;
+      }
+      .al-sub {
+        font-size: 11px;
+        color: var(--sp-muted);
+        line-height: 1.55;
+        margin-bottom: 6px;
+      }
+      .al-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      /* ── IRRITANT TABLE ── */
+      .itable {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--sp-border);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--sp-white);
+      }
+      .itable th {
+        padding: 10px 13px;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: left;
+        background: var(--sp-dark);
+        color: var(--sp-lime);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .itable td {
+        padding: 9px 13px;
+        font-size: 12px;
+        border-bottom: 1px solid #f1f0f8;
+        vertical-align: top;
+        line-height: 1.5;
+      }
+      .itable tr:last-child td {
+        border-bottom: none;
+      }
+      .itable tr:hover td {
+        background: #f8f8fc;
+      }
+      .sev-h {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-weight: 700;
+      }
+      .sev-c {
+        background: #fcebeb;
+        color: #791f1f;
+      }
+      .sev-m {
+        background: #fff3cd;
+        color: #7a4f00;
+      }
+
+      /* ── COMPARISON TABLE ── */
+      .ctable {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--sp-border);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--sp-white);
+      }
+      .ctable th {
+        padding: 11px 13px;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: left;
+        border-bottom: 1px solid var(--sp-border);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .ctable th:first-child {
+        background: var(--sp-dark);
+        color: var(--sp-lime);
+      }
+      .ctable th.th-fl {
+        background: var(--sp-lime);
+        color: var(--sp-dark);
+      }
+      .ctable th.th-fx {
+        background: #fff3cd;
+        color: #7a4f00;
+      }
+      .ctable th.th-spa {
+        background: #e6f1fb;
+        color: #0c447c;
+      }
+      .ctable td {
+        padding: 9px 13px;
+        font-size: 12px;
+        border-bottom: 1px solid #f1f0f8;
+        vertical-align: top;
+        line-height: 1.5;
+      }
+      .ctable tr:last-child td {
+        border-bottom: none;
+      }
+      .ctable td:first-child {
+        font-weight: 700;
+        font-size: 11px;
+        color: var(--sp-dark);
+        background: #f8f8fc;
+        border-right: 1px solid var(--sp-border);
+      }
+      .win {
+        background: rgba(182, 221, 16, 0.12);
+        font-weight: 600;
+      }
+
+      /* ── PRINCIPLE CARDS ── */
+      .principle-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+      .principle {
+        background: var(--sp-dark);
+        border-radius: 10px;
+        padding: 14px;
+        position: relative;
+        overflow: hidden;
+      }
+      .principle::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--sp-lime);
+      }
+      .principle-icon {
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+      .principle-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--sp-lime);
+        margin-bottom: 4px;
+      }
+      .principle-desc {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.65);
+        line-height: 1.5;
+      }
+
+      /* ── CAP GRID ── */
+      .cap-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+        gap: 10px;
+      }
+      .cap-card {
+        background: var(--sp-white);
+        border: 1px solid var(--sp-border);
+        border-radius: 9px;
+        padding: 13px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        transition: border-color 0.15s;
+      }
+      .cap-card:hover {
+        border-color: var(--sp-lime);
+      }
+      .cap-icon {
+        font-size: 20px;
+      }
+      .cap-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--sp-dark);
+      }
+      .cap-impl {
+        font-size: 11px;
+        color: var(--sp-muted);
+        line-height: 1.4;
+      }
+      .cap-tag {
+        font-size: 9px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 700;
+        display: inline-block;
+        margin-top: 3px;
+        width: fit-content;
+      }
+      .cap-native {
+        background: var(--sp-lime);
+        color: var(--sp-dark);
+      }
+      .cap-easy {
+        background: #e1f5ee;
+        color: #085041;
+      }
+      .cap-pkg {
+        background: #fff3cd;
+        color: #7a4f00;
+      }
+
+      /* ── ROADMAP ── */
+      .roadmap {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        border: 1px solid var(--sp-border);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+      .rm-phase {
+        display: grid;
+        grid-template-columns: 170px 1fr;
+        border-bottom: 1px solid var(--sp-border);
+      }
+      .rm-phase:last-child {
+        border-bottom: none;
+      }
+      .rm-left {
+        padding: 14px 16px;
+        background: var(--sp-dark);
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        border-right: 2px solid var(--sp-lime);
+      }
+      .rm-step {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--sp-lime);
+      }
+      .rm-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--sp-white);
+      }
+      .rm-dur {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 3px;
+      }
+      .rm-right {
+        padding: 14px 18px;
+        background: var(--sp-white);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px 20px;
+      }
+      .rm-task {
+        font-size: 11px;
+        color: var(--sp-text);
+        display: flex;
+        gap: 6px;
+        align-items: start;
+        line-height: 1.5;
+      }
+      .rm-task::before {
+        content: "→";
+        color: var(--sp-lime);
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+
+      /* ── RISK TABLE ── */
+      .risk-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-top: 14px;
+      }
+      .risk-card {
+        border-radius: 10px;
+        padding: 16px;
+        border: 1px solid;
+      }
+
+      /* ── A-ITEMS ── */
+      .a-item {
+        display: flex;
+        align-items: start;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f0f8;
+      }
+      .a-item:last-child {
+        border-bottom: none;
+      }
+      .a-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-top: 5px;
+        flex-shrink: 0;
+        background: var(--sp-lime);
+      }
+      .a-main {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--sp-dark);
+      }
+      .a-sub {
+        font-size: 11px;
+        color: var(--sp-muted);
+        margin-top: 1px;
+        line-height: 1.4;
+      }
+
+      /* ── NOTE ── */
+      .note {
+        font-size: 11px;
+        color: var(--sp-muted);
+        background: rgba(182, 221, 16, 0.08);
+        border-left: 3px solid var(--sp-lime);
+        padding: 10px 13px;
+        border-radius: 0 6px 6px 0;
+        margin-top: 12px;
+        line-height: 1.65;
+      }
+
+      /* ── VERSUS BOX ── */
+      .versus {
+        display: grid;
+        grid-template-columns: 1fr 48px 1fr;
+        gap: 0;
+        border: 1px solid var(--sp-border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .vs-old {
+        background: var(--sp-white);
+      }
+      .vs-new {
+        background: #f6fff0;
+      }
+      .vs-head {
+        padding: 10px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        border-bottom: 1px solid var(--sp-border);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .vs-body {
+        padding: 14px;
+      }
+      .vs-mid {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--sp-lime);
+        font-weight: 800;
+        font-size: 16px;
+        color: var(--sp-dark);
+      }
+
+      /* ── CONCLUSION ── */
+      .conclusion {
+        background: var(--sp-dark);
+        padding: 44px 52px;
+        position: relative;
+        overflow: hidden;
+      }
+      .conclusion::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--sp-lime);
+      }
+      .concl-glow {
+        position: absolute;
+        bottom: -100px;
+        right: -60px;
+        width: 350px;
+        height: 350px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(182, 221, 16, 0.1) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .concl-h2 {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--sp-white);
+        margin-bottom: 7px;
+      }
+      .concl-sub {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 26px;
+        line-height: 1.7;
+      }
+      .concl-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+      .concl-card {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 16px;
+      }
+      .concl-card h4 {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--sp-lime);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .concl-card ul {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.75);
+        line-height: 1.75;
+        padding-left: 14px;
+      }
+      .final-msg {
+        background: rgba(182, 221, 16, 0.07);
+        border-left: 3px solid var(--sp-lime);
+        padding: 18px 22px;
+        border-radius: 0 8px 8px 0;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.8;
+        font-style: italic;
+      }
+
+      /* ── FOOTER ── */
+      .sp-footer {
+        background: var(--sp-dark2);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 20px 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .sp-footer img {
+        height: 20px;
+        opacity: 0.7;
+      }
+      .sp-footer-text {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      @media print {
+        .topbar,
+        .sp-footer {
+          display: none;
+        }
+        body {
+          background: #fff;
+        }
+        .section {
+          page-break-inside: avoid;
+        }
+        .cover {
+          page-break-after: always;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <img
+        src="https://www.smartpoint.fr/wp-content/uploads/cropped-LOGO_SMARTPOINT-1.png"
+        alt="Smartpoint"
+        style="height: 28px"
+      />
+      <span class="tb-meta"
+        >Pré-étude Architecture — SIGEDAV / ADAGP — Confidentiel</span
+      >
+      <div class="tb-right">
+        <button
+          class="tbtn"
+          onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+        >
+          ↑ Haut
+        </button>
+        <button class="tbtn tbtn-lime" onclick="window.print()">
+          ↓ Exporter PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <!-- ════ COVER ════ -->
+      <div class="cover">
+        <div class="cover-glow"></div>
+        <div class="cover-glow2"></div>
+        <div class="cover-eyebrow">Document de cadrage architectural</div>
+        <div class="cover-h1">
+          Pré-étude d'architecture<br />technique cible — <span>SIGEDAV</span>
+        </div>
+        <div class="cover-sub">
+          Modernisation de l'application de gestion des droits d'auteur de
+          l'ADAGP — migration depuis une architecture monolithique
+          Java/Swing/EJB/Oracle vers un écosystème modulaire Spring Boot 3 +
+          Flutter + PostgreSQL.
+        </div>
+        <div class="cover-stripe"></div>
+        <div class="cover-meta">
+          <div class="cm-item">
+            <div class="cm-label">Client</div>
+            <div class="cm-value">ADAGP</div>
+          </div>
+          <div class="cm-item">
+            <div class="cm-label">Projet</div>
+            <div class="cm-value">SIGEDAV — Modernisation SI</div>
+          </div>
+          <div class="cm-item">
+            <div class="cm-label">Rédigé par</div>
+            <div class="cm-value">Smartpoint</div>
+          </div>
+          <div class="cm-item">
+            <div class="cm-label">Version</div>
+            <div class="cm-value">v1.0 — Juin 2026</div>
+          </div>
+          <div class="cm-item">
+            <div class="cm-label">Phase</div>
+            <div class="cm-value">Cadrage architectural</div>
+          </div>
+          <div class="cm-item">
+            <div class="cm-label">Diffusion</div>
+            <div class="cm-value">Restreinte — Direction Technique</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ TOC ════ -->
+      <div class="toc">
+        <div class="toc-title">Table des matières</div>
+        <div class="toc-grid">
+          <div
+            class="toc-item"
+            onclick="
+              document
+                .getElementById('s1')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            <span class="toc-num">01</span
+            ><span class="toc-lbl">Contexte et enjeux de modernisation</span>
+          </div>
+          <div
+            class="toc-item"
+            onclick="
+              document
+                .getElementById('s2')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            <span class="toc-num">02</span
+            ><span class="toc-lbl"
+              >Principes directeurs de l'architecture cible</span
+            >
+          </div>
+          <div
+            class="toc-item"
+            onclick="
+              document
+                .getElementById('s3')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            <span class="toc-num">03</span
+            ><span class="toc-lbl"
+              >Flutter : technologie front-end pour SIGEDAV</span
+            >
+          </div>
+          <div
+            class="toc-item"
+            onclick="
+              document
+                .getElementById('s4')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            <span class="toc-num">04</span
+            ><span class="toc-lbl"
+              >Analyse comparative approfondie des technologies</span
+            >
+          </div>
+          <div
+            class="toc-item"
+            onclick="
+              document
+                .getElementById('s5')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            <span class="toc-num">05</span
+            ><span class="toc-lbl">Réponse aux besoins ergonomiques ADAGP</span>
+          </div>
+          <div
+            class="toc-item"
+            onclick="
+              document
+                .getElementById('s6')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            <span class="toc-num">06</span
+            ><span class="toc-lbl">Architecture technique cible proposée</span>
+          </div>
+          <div
+            class="toc-item"
+            onclick="
+              document
+                .getElementById('s7')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            <span class="toc-num">07</span
+            ><span class="toc-lbl"
+              >Stratégie de transformation et gestion des risques</span
+            >
+          </div>
+          <div
+            class="toc-item"
+            onclick="
+              document
+                .getElementById('s8')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            <span class="toc-num">08</span
+            ><span class="toc-lbl"
+              >Conclusion et recommandations préliminaires</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ S1 ════ -->
+      <div class="section" id="s1">
+        <div class="s-num">01 — Contexte</div>
+        <div class="s-h1">Contexte et enjeux de modernisation de SIGEDAV</div>
+        <div class="s-intro">
+          SIGEDAV est l'application centrale de gestion des droits d'auteur de
+          l'ADAGP. Conçue sur des technologies des années 2000, elle accumule
+          une dette technique significative qui fragilise à la fois la sécurité,
+          la maintenabilité et la productivité des équipes.
+        </div>
+
+        <div class="kpi-row">
+          <div class="kpi">
+            <div class="kpi-num">~35</div>
+            <div class="kpi-lbl">utilisateurs internes concernés</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-num">Java 8</div>
+            <div class="kpi-lbl">version EoL Oracle depuis 2019</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-num">EJB</div>
+            <div class="kpi-lbl">technologie obsolète à migrer</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-num">1</div>
+            <div class="kpi-lbl">monolithe à décomposer</div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="sub-title">Stack technologique existant</div>
+          <div class="g2">
+            <div class="card">
+              <div
+                class="card-head"
+                style="
+                  background: #fcebeb;
+                  color: #791f1f;
+                  border-color: #f0c0c0;
+                "
+              >
+                🔴 Composants techniques actuels
+              </div>
+              <div class="card-body">
+                <ul class="blist dot">
+                  <li>
+                    <strong>Langage :</strong> Java 8 — EOL depuis janvier 2019,
+                    aucun correctif de sécurité Oracle sans licence payante
+                  </li>
+                  <li>
+                    <strong>Interface :</strong> Swing — bibliothèque graphique
+                    de 1997, rendu géré par la JVM, look & feel figé
+                  </li>
+                  <li>
+                    <strong>Back-end :</strong> EJB 2/3 — spécification J2EE
+                    lourde, nécessite un serveur JBoss/WebLogic coûteux
+                  </li>
+                  <li>
+                    <strong>Base de données :</strong> Oracle — licence
+                    propriétaire onéreuse, forte dépendance éditeur
+                  </li>
+                  <li>
+                    <strong>Fichiers complémentaires :</strong> Access
+                    .mdb/.accdb — données non structurées, risque de perte élevé
+                  </li>
+                  <li>
+                    <strong>Déploiement :</strong> JAR/EAR monolithique — arrêt
+                    global obligatoire à chaque mise à jour
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="card">
+              <div
+                class="card-head"
+                style="
+                  background: #f6fff0;
+                  color: #085041;
+                  border-color: #c0e0c0;
+                "
+              >
+                🟢 Périmètre fonctionnel concerné
+              </div>
+              <div class="card-body">
+                <ul class="blist dot">
+                  <li>
+                    Gestion du catalogue d'œuvres protégées et de leurs
+                    métadonnées
+                  </li>
+                  <li>Référentiel des créateurs, ayants droit et mandats</li>
+                  <li>
+                    Gestion des licences d'utilisation et de leurs périmètres
+                  </li>
+                  <li>Calcul et suivi des reversements de droits</li>
+                  <li>Reporting interne et tableaux de bord de pilotage</li>
+                  <li>Gestion documentaire associée aux dossiers</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="sub-title">Principaux irritants — analyse détaillée</div>
+          <table class="itable">
+            <thead>
+              <tr>
+                <th>Irritant</th>
+                <th>Description détaillée</th>
+                <th>Conséquence métier</th>
+                <th>Sévérité</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Ergonomie vieillissante</strong></td>
+                <td>
+                  Interface Swing non conforme aux standards UX actuels — pas de
+                  responsive, navigation non intuitive, pas de raccourcis
+                  modernes
+                </td>
+                <td>
+                  Perte de productivité estimée, frustration utilisateurs,
+                  résistance au changement
+                </td>
+                <td><span class="sev-h sev-c">🔴 Critique</span></td>
+              </tr>
+              <tr>
+                <td><strong>Dette Java 8 / EoL</strong></td>
+                <td>
+                  Plus de mises à jour de sécurité sans licence Oracle payante.
+                  Incompatibilité croissante avec les bibliothèques modernes
+                  (Spring 6+, Jakarta EE 10)
+                </td>
+                <td>
+                  Exposition aux vulnérabilités CVE non corrigées, blocage des
+                  évolutions
+                </td>
+                <td><span class="sev-h sev-c">🔴 Critique</span></td>
+              </tr>
+              <tr>
+                <td><strong>Architecture EJB</strong></td>
+                <td>
+                  Couplage fort entre composants, serveur applicatif lourd
+                  (JBoss/WebLogic), déploiements complexes, coûts de licences
+                  élevés
+                </td>
+                <td>
+                  Délais de livraison longs, coûts d'infrastructure élevés,
+                  compétences rares
+                </td>
+                <td><span class="sev-h sev-c">🔴 Critique</span></td>
+              </tr>
+              <tr>
+                <td><strong>Dépendance Oracle</strong></td>
+                <td>
+                  Licences annuelles estimées à plusieurs dizaines de k€,
+                  lock-in éditeur fort, migration cloud complexe avec Oracle
+                </td>
+                <td>
+                  TCO élevé, dépendance contractuelle, frein à la modernisation
+                  infrastructure
+                </td>
+                <td><span class="sev-h sev-m">🟠 Majeur</span></td>
+              </tr>
+              <tr>
+                <td><strong>Déploiements destructifs</strong></td>
+                <td>
+                  Chaque mise à jour nécessite l'arrêt complet du système —
+                  indisponibilité planifiée récurrente impactant les 35
+                  utilisateurs
+                </td>
+                <td>
+                  Continuité de service dégradée, impossibilité de livraisons
+                  fréquentes
+                </td>
+                <td><span class="sev-h sev-m">🟠 Majeur</span></td>
+              </tr>
+              <tr>
+                <td><strong>Fichiers Access</strong></td>
+                <td>
+                  Données métier critiques stockées dans des fichiers
+                  .mdb/.accdb non versionnés, sans sauvegarde centralisée ni
+                  contrôle d'accès fin
+                </td>
+                <td>
+                  Risque élevé de perte ou corruption de données métier
+                  critiques
+                </td>
+                <td><span class="sev-h sev-c">🔴 Critique</span></td>
+              </tr>
+              <tr>
+                <td><strong>Non-conformité RGPD</strong></td>
+                <td>
+                  Absence de journalisation fine des accès aux données
+                  personnelles, traçabilité insuffisante, pas de gestion des
+                  durées de conservation
+                </td>
+                <td>
+                  Risque juridique et réglementaire — sanctions CNIL
+                  potentielles
+                </td>
+                <td><span class="sev-h sev-c">🔴 Critique</span></td>
+              </tr>
+              <tr>
+                <td><strong>Performances dégradées</strong></td>
+                <td>
+                  Requêtes Oracle non optimisées, absence de cache applicatif,
+                  rendu Swing bloquant sur l'EDT (Event Dispatch Thread)
+                </td>
+                <td>
+                  Temps de réponse élevés sur certaines fonctions, productivité
+                  réduite
+                </td>
+                <td><span class="sev-h sev-m">🟠 Majeur</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="note">
+            ℹ️ Cette évaluation est préliminaire et sera affinée lors de la
+            mission d'audit (Étape 1). La qualification définitive sera réalisée
+            avec les équipes ADAGP.
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ S2 ════ -->
+      <div class="section" id="s2">
+        <div class="s-num">02 — Principes</div>
+        <div class="s-h1">Principes directeurs de l'architecture cible</div>
+        <div class="s-intro">
+          L'architecture cible est guidée par huit principes fondateurs qui
+          répondent directement aux irritants identifiés et posent les bases
+          d'un système pérenne, évolutif et souverain.
+        </div>
+
+        <div class="principle-grid" style="margin-bottom: 24px">
+          <div class="principle">
+            <div class="principle-icon">🎨</div>
+            <div class="principle-name">UX Moderne</div>
+            <div class="principle-desc">
+              Interface conforme aux standards 2026 — Material 3, animations
+              fluides, raccourcis clavier, productivité maximale.
+            </div>
+          </div>
+          <div class="principle">
+            <div class="principle-icon">🧹</div>
+            <div class="principle-name">Réduction dette</div>
+            <div class="principle-desc">
+              Sortie définitive de Java 8, EJB et Oracle. Migration vers des
+              technologies maintenues avec LTS long.
+            </div>
+          </div>
+          <div class="principle">
+            <div class="principle-icon">🧩</div>
+            <div class="principle-name">Modularité</div>
+            <div class="principle-desc">
+              Découpage en domaines fonctionnels indépendants — déploiement et
+              évolution domaine par domaine.
+            </div>
+          </div>
+          <div class="principle">
+            <div class="principle-icon">🏭</div>
+            <div class="principle-name">Industrialisation</div>
+            <div class="principle-desc">
+              CI/CD, tests automatisés, IaC — livraisons continues sans
+              interruption de service.
+            </div>
+          </div>
+          <div class="principle">
+            <div class="principle-icon">🔒</div>
+            <div class="principle-name">Sécurité by design</div>
+            <div class="principle-desc">
+              JWT, RBAC, audit log RGPD, Row-Level Security BDD — sécurité
+              intégrée à chaque couche.
+            </div>
+          </div>
+          <div class="principle">
+            <div class="principle-icon">🇫🇷</div>
+            <div class="principle-name">Souveraineté</div>
+            <div class="principle-desc">
+              Technologies open source (Spring, Flutter, PostgreSQL) — zéro
+              dépendance à un éditeur propriétaire.
+            </div>
+          </div>
+          <div class="principle">
+            <div class="principle-icon">💰</div>
+            <div class="principle-name">Réduction TCO</div>
+            <div class="principle-desc">
+              Suppression licences Oracle + JBoss, infrastructure optimisée,
+              maintenance simplifiée.
+            </div>
+          </div>
+          <div class="principle">
+            <div class="principle-icon">📈</div>
+            <div class="principle-name">Évolutivité</div>
+            <div class="principle-desc">
+              Architecture prête pour la montée en charge, l'ajout de modules et
+              l'intégration de partenaires via API.
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="sub-title">
+            Vue macro : monolithe actuel → architecture modulaire moderne
+          </div>
+          <div class="versus">
+            <div class="vs-old">
+              <div
+                class="vs-head"
+                style="
+                  background: #fcebeb;
+                  color: #791f1f;
+                  border-color: #f0c0c0;
+                "
+              >
+                🔴 Monolithe actuel
+              </div>
+              <div class="vs-body">
+                <ul class="blist cross">
+                  <li>1 seul déployable — tout couplé dans un EAR/WAR</li>
+                  <li>Java 8 + Swing + EJB — stack EoL ou obsolète</li>
+                  <li>Oracle Database — licence propriétaire onéreuse</li>
+                  <li>Arrêt total du système à chaque déploiement</li>
+                  <li>Pas d'API — client lourd desktop uniquement</li>
+                  <li>Tests manuels — risques de régression élevés</li>
+                  <li>Fichiers Access non structurés et non sécurisés</li>
+                  <li>Zéro traçabilité RGPD des accès aux données</li>
+                </ul>
+              </div>
+            </div>
+            <div class="vs-mid">→</div>
+            <div class="vs-new">
+              <div
+                class="vs-head"
+                style="
+                  background: #f6fff0;
+                  color: #085041;
+                  border-color: #c0e0c0;
+                "
+              >
+                🟢 Architecture modulaire cible
+              </div>
+              <div class="vs-body">
+                <ul class="blist check">
+                  <li>Modules indépendants — déploiement par domaine</li>
+                  <li>Java 21 LTS + Spring Boot 3 + Flutter 3.x</li>
+                  <li>PostgreSQL 16 — open source, souverain, performant</li>
+                  <li>Déploiement continu zero-downtime (blue/green)</li>
+                  <li>API REST OpenAPI — multicanal, réutilisable</li>
+                  <li>Tests automatisés — CI/CD GitHub Actions</li>
+                  <li>Données migrées en BDD versionnée et sécurisée</li>
+                  <li>Audit log horodaté — conformité RGPD intégrée</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ S3 ════ -->
+      <div class="section" id="s3">
+        <div class="s-num">03 — Flutter</div>
+        <div class="s-h1">Flutter : technologie front-end pour SIGEDAV</div>
+        <div class="s-intro">
+          Flutter est le framework UI open source de Google permettant de créer
+          des applications compilées nativement pour Windows, macOS, Linux, Web,
+          iOS et Android depuis un unique codebase Dart. Il représente une
+          rupture radicale avec Swing dans la qualité d'expérience utilisateur.
+        </div>
+
+        <div class="g2" style="margin-bottom: 22px">
+          <div>
+            <div class="sub-title">Présentation technique de Flutter</div>
+            <div class="card">
+              <div class="card-body">
+                <ul class="blist dot">
+                  <li>
+                    <strong>Créé par Google en 2018</strong> — version 3.x
+                    stable et mature depuis 2022, plus de 1 500 contributeurs
+                    actifs sur GitHub
+                  </li>
+                  <li>
+                    <strong>Langage Dart</strong> — fortement typé, null-safety,
+                    syntaxe proche de Java/TypeScript — courbe d'apprentissage
+                    courte pour les développeurs Java
+                  </li>
+                  <li>
+                    <strong>Moteur graphique propre</strong> — Impeller
+                    (successeur de Skia) — rendu 60/120 fps indépendant du rendu
+                    natif OS, pixel perfect sur toutes les plateformes
+                  </li>
+                  <li>
+                    <strong>Compilation AOT</strong> (Ahead-Of-Time) —
+                    l'application est compilée en binaire natif, pas
+                    d'interpréteur au runtime — performances proches du natif
+                  </li>
+                  <li>
+                    <strong>Architecture widget tree</strong> — tout est widget,
+                    composable et testable — séparation claire UI / logique
+                  </li>
+                  <li>
+                    <strong>Material 3 + Cupertino</strong> — composants natifs
+                    prêts à l'emploi, thème centralisé, dark mode intégré
+                  </li>
+                  <li>
+                    <strong>Hot reload</strong> — rechargement de l'UI en
+                    millisecondes sans perdre l'état — productivité de
+                    développement x2 vs Swing
+                  </li>
+                  <li>
+                    <strong>Écosystème pub.dev</strong> — plus de 40 000
+                    packages disponibles — D&D, PDF, impression, AD/LDAP, file
+                    picker…
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="sub-title">
+              Pourquoi Flutter est le bon choix pour SIGEDAV
+            </div>
+            <div class="card" style="background: var(--sp-dark); border: none">
+              <div class="card-body-dark">
+                <ul class="blist blist-dark">
+                  <li>
+                    <strong style="color: var(--sp-lime)"
+                      >Interfaces riches desktop :</strong
+                    >
+                    formulaires complexes multi-champs, tableaux triables et
+                    paginés, D&D natif, sélection multiple — tous les besoins
+                    ADAGP couverts nativement
+                  </li>
+                  <li>
+                    <strong style="color: var(--sp-lime)"
+                      >Expérience desktop Windows :</strong
+                    >
+                    compilation Win32 native — exécutable autonome sans JVM,
+                    sans navigateur, sans dépendance runtime à déployer
+                  </li>
+                  <li>
+                    <strong style="color: var(--sp-lime)"
+                      >Pérennité technologique :</strong
+                    >
+                    soutenu par Google avec un budget R&D conséquent, roadmap
+                    publique transparente, Flutter est utilisé en production par
+                    Google, BMW, eBay, Alibaba
+                  </li>
+                  <li>
+                    <strong style="color: var(--sp-lime)"
+                      >Migration progressive :</strong
+                    >
+                    Flutter communique exclusivement via HTTP — il peut se
+                    brancher sur une API Spring Boot coexistant avec l'ancien
+                    système EJB pendant la transition
+                  </li>
+                  <li>
+                    <strong style="color: var(--sp-lime)"
+                      >Un codebase = 5 plateformes :</strong
+                    >
+                    si l'ADAGP souhaite ouvrir l'accès web ou mobile à l'avenir,
+                    le même code Flutter compile sans modification majeure
+                  </li>
+                  <li>
+                    <strong style="color: var(--sp-lime)"
+                      >Testabilité intégrée :</strong
+                    >
+                    flutter_test au SDK — tests unitaires Dart + widget tests —
+                    pipeline CI/CD complet sans dépendance externe
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="sub-title">
+            Positionnement dans la stack cible SIGEDAV
+          </div>
+          <div class="archi-stack">
+            <div class="archi-layer">
+              <div class="al-label">Poste utilisateur</div>
+              <div class="al-content">
+                <div class="al-title">
+                  Application Flutter Desktop — Windows (natif Win32)
+                </div>
+                <div class="al-sub">
+                  Remplace intégralement l'interface Swing. Rendu 60fps
+                  indépendant de l'OS. Formulaires réactifs, D&D typé, tableaux,
+                  menus contextuels. Pas de JVM à déployer — exécutable
+                  autonome. Thème centralisé aux couleurs ADAGP via ThemeData.
+                </div>
+                <div class="al-tags">
+                  <span class="badge b-lime">Flutter 3.x</span
+                  ><span class="badge b-lime">Dart / null-safety</span
+                  ><span class="badge b-lime">Material 3</span
+                  ><span class="badge b-lime">Riverpod</span
+                  ><span class="badge b-lime">Go Router</span>
+                </div>
+              </div>
+            </div>
+            <div class="archi-layer">
+              <div class="al-label">API & Sécurité</div>
+              <div class="al-content">
+                <div class="al-title">
+                  API REST — Spring Boot 3 + OpenAPI 3 + Spring Security + JWT
+                </div>
+                <div class="al-sub">
+                  Contrat documenté entre Flutter et le back-end.
+                  Authentification JWT stateless intégrable avec l'Active
+                  Directory ADAGP. Documentation Swagger auto-générée. Rate
+                  limiting, CORS, logging centralisé des accès (RGPD).
+                </div>
+                <div class="al-tags">
+                  <span class="badge b-dark">Spring Boot 3</span
+                  ><span class="badge b-dark">JWT</span
+                  ><span class="badge b-dark">OpenAPI 3</span
+                  ><span class="badge b-dark">Spring Security</span
+                  ><span class="badge b-dark">LDAP/AD</span>
+                </div>
+              </div>
+            </div>
+            <div class="archi-layer">
+              <div class="al-label">Services métier</div>
+              <div class="al-content">
+                <div class="al-title">
+                  Modules Spring Boot — découpage par domaines fonctionnels
+                </div>
+                <div class="al-sub">
+                  Remplace les EJB. Chaque domaine (Droits, Ayants droit,
+                  Licences, Reversements, Documents) est un module Spring Boot
+                  indépendant. Transactions @Transactional, événements domaine
+                  pour la traçabilité inter-modules.
+                </div>
+                <div class="al-tags">
+                  <span class="badge b-blue">Droits & Œuvres</span
+                  ><span class="badge b-blue">Ayants droit</span
+                  ><span class="badge b-blue">Licences</span
+                  ><span class="badge b-blue">Reversements</span
+                  ><span class="badge b-blue">Documents</span
+                  ><span class="badge b-blue">Reporting</span>
+                </div>
+              </div>
+            </div>
+            <div class="archi-layer">
+              <div class="al-label">Persistance</div>
+              <div class="al-content">
+                <div class="al-title">
+                  PostgreSQL 16 — remplacement Oracle — Spring Data JPA + Flyway
+                </div>
+                <div class="al-sub">
+                  Open source, haute disponibilité, JSONB, Row-Level Security
+                  pour la confidentialité RGPD. Migration depuis Oracle via
+                  scripts Flyway versionnés. Audit automatique via Spring Data
+                  Auditing. Backup PgBackRest.
+                </div>
+                <div class="al-tags">
+                  <span class="badge b-green">PostgreSQL 16</span
+                  ><span class="badge b-green">Flyway</span
+                  ><span class="badge b-green">Row-Level Security</span
+                  ><span class="badge b-green">Spring Data JPA</span
+                  ><span class="badge b-green">PgBackRest</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ S4 ════ -->
+      <div class="section" id="s4">
+        <div class="s-num">04 — Analyse comparative</div>
+        <div class="s-h1">
+          Analyse comparative approfondie des technologies front-end
+        </div>
+        <div class="s-intro">
+          Cette section compare de manière exhaustive les trois options
+          technologiques envisageables pour le front-end de SIGEDAV : Flutter,
+          JavaFX et une SPA Web (Angular/React). L'analyse couvre 13 critères
+          déterminants pour le succès du projet ADAGP.
+        </div>
+
+        <div class="subsection">
+          <div class="sub-title">Analyse forces / vigilances Flutter</div>
+          <div class="g2" style="margin-bottom: 22px">
+            <div class="card">
+              <div
+                class="card-head"
+                style="
+                  background: rgba(182, 221, 16, 0.15);
+                  color: var(--sp-dark);
+                  border-color: var(--sp-lime);
+                "
+              >
+                ✅ Forces — arguments en faveur de Flutter
+              </div>
+              <div class="card-body">
+                <ul class="blist check">
+                  <li>
+                    <strong>Productivité ×2 vs Swing :</strong> hot reload
+                    (rechargement en &lt;500ms), composants Material 3 prêts à
+                    l'emploi, scaffolding rapide — réduit significativement le
+                    temps de développement UI
+                  </li>
+                  <li>
+                    <strong>Rendu pixel-perfect 60/120fps :</strong> le moteur
+                    graphique Impeller de Flutter bypasse les APIs de rendu OS —
+                    performances constantes sur tous les Windows, pas de lags
+                    liés à la JVM
+                  </li>
+                  <li>
+                    <strong>Zéro runtime à déployer :</strong> l'exécutable
+                    Flutter Windows est un binaire autonome — plus de JVM 8 à
+                    maintenir, à mettre à jour, à licencier sur chaque poste
+                  </li>
+                  <li>
+                    <strong>Testabilité native :</strong> flutter_test SDK
+                    intégré permet des tests unitaires Dart ET des widget tests
+                    simulant des interactions UI — couverture 100% atteignable
+                    sans framework externe
+                  </li>
+                  <li>
+                    <strong>Évolutivité multiplateforme :</strong> si l'ADAGP
+                    souhaite exposer SIGEDAV en web ou mobile, le même code
+                    Flutter compile sans réécriture — investissement pérenne
+                  </li>
+                  <li>
+                    <strong>Adoption industrielle massive :</strong> utilisé en
+                    production par Google Pay, BMW, eBay, Alibaba, Nubank (50M+
+                    utilisateurs) — maturité prouvée à grande échelle
+                  </li>
+                  <li>
+                    <strong>Communauté et recrutement :</strong> 550 000+
+                    développeurs Flutter dans le monde (enquête Stack Overflow
+                    2023), bassin de recrutement large et en croissance rapide
+                  </li>
+                  <li>
+                    <strong>Intégration AD/LDAP :</strong> via l'API Spring Boot
+                    — Flutter n'accède pas directement au SI, tout passe par
+                    l'API sécurisée — modèle de sécurité propre et centralisé
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="card">
+              <div
+                class="card-head"
+                style="
+                  background: #fff3cd;
+                  color: #7a4f00;
+                  border-color: #f0d070;
+                "
+              >
+                ⚠️ Points de vigilance — à anticiper dès le démarrage
+              </div>
+              <div class="card-body">
+                <ul class="blist warn">
+                  <li>
+                    <strong>Courbe d'apprentissage Dart :</strong> estimée à 2-3
+                    jours pour un développeur Java senior — la syntaxe est
+                    proche (orientée objet, typé fort), mais le paradigme "tout
+                    est widget" nécessite une acculturation. Mitigation :
+                    formation dédiée en phase 3 + PoC guidé
+                  </li>
+                  <li>
+                    <strong
+                      >Flutter Desktop — maturité moindre que mobile :</strong
+                    >
+                    stable depuis mars 2022, l'écosystème desktop est plus jeune
+                    que mobile. Certains packages n'ont pas encore de support
+                    Windows. Mitigation : audit des packages nécessaires avant
+                    démarrage
+                  </li>
+                  <li>
+                    <strong>Intégrations OS spécifiques :</strong> impression
+                    native Windows, accès périphériques spéciaux, intégration
+                    COM — nécessitent des "platform channels" Dart↔Win32.
+                    Mitigation : cartographie des besoins en phase 1
+                  </li>
+                  <li>
+                    <strong>API REST prérequise :</strong> Flutter communique
+                    exclusivement en HTTP. Une API Spring Boot bien conçue est
+                    un prérequis absolu avant de démarrer le front. Mitigation :
+                    démarrer le back-end en phase 2 avant le front en phase 3
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="sub-title">
+            Tableau comparatif exhaustif — Flutter vs JavaFX vs SPA Web
+          </div>
+          <table class="ctable">
+            <thead>
+              <tr>
+                <th>Critère d'évaluation</th>
+                <th class="th-fl">Flutter 3.x ✦ Recommandé</th>
+                <th class="th-fx">JavaFX 21</th>
+                <th class="th-spa">SPA Web (Angular / React)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Performance rendu desktop</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — Moteur Impeller 60/120fps, rendu GPU-accéléré,
+                  indépendant de l'OS. Animations fluides sans lag même sur
+                  données volumineuses.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐ — Rendu JavaFX Hardware-accelerated via Prism, mais
+                  dépend de la JVM et peut dégrader sur machines légères.
+                </td>
+                <td>
+                  ⭐⭐⭐ — Limité par le moteur de rendu du navigateur
+                  (Chromium). Les grandes listes ou tableaux peuvent générer des
+                  lags sans virtualisation manuelle.
+                </td>
+              </tr>
+              <tr>
+                <td>Expérience utilisateur desktop</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — Material 3 natif, raccourcis clavier, menus
+                  contextuels, multi-fenêtres, Drag & Drop typé. L'UX la plus
+                  proche des applications desktop modernes (Notion, Linear,
+                  Figma).
+                </td>
+                <td>
+                  ⭐⭐⭐ — Composants plus rigides. L'expérience reste proche de
+                  Swing visuellement. Le marché perçoit JavaFX comme une
+                  évolution mineure de Swing, pas une modernisation radicale.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐ — UX web moderne mais certaines interactions desktop
+                  (D&D OS, raccourcis système, menus natifs) sont limitées par
+                  les APIs navigateur.
+                </td>
+              </tr>
+              <tr>
+                <td>Déploiement et infrastructure</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — Exécutable autonome (.exe Windows). Zéro
+                  dépendance runtime. Pas de JVM à installer et maintenir sur
+                  chaque poste. Mise à jour via simple remplacement du binaire.
+                </td>
+                <td>
+                  ⭐⭐⭐ — Nécessite une JVM 21 sur chaque poste (ou packaging
+                  JLink). Déploiement plus lourd. Gestion des runtimes sur le
+                  parc Windows de l'ADAGP.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐ — Déploiement simple sur un serveur web
+                  (Nginx/Apache). Pas de client à installer. Mais nécessite un
+                  navigateur récent et une connectivité réseau permanente.
+                </td>
+              </tr>
+              <tr>
+                <td>Portée multiplateforme</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — Windows, macOS, Linux, Web (WASM), iOS, Android
+                  depuis 1 seul codebase. Si l'ADAGP veut ouvrir SIGEDAV en web
+                  ou mobile : zéro réécriture.
+                </td>
+                <td>
+                  ⭐⭐⭐ — Windows, macOS, Linux (JVM). Pas de mobile natif. Pas
+                  de compilation web. Chemin d'évolution limité.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐ — Natif web, responsive mobile (PWA). Desktop via
+                  Electron (doublon de code). Pas de compilation desktop native
+                  sans surcouche.
+                </td>
+              </tr>
+              <tr>
+                <td>Richesse des composants métier</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — D&D natif (Draggable/DragTarget typé), DataTable2
+                  paginé/trié, ReorderableListView, FilePicker, DatePicker,
+                  TreeView, formulaires avec validation réactive. Tout couvert
+                  nativement ou via packages matures.
+                </td>
+                <td>
+                  ⭐⭐⭐ — Composants disponibles mais moins riches. TableView
+                  configurable mais verbeux. D&D possible mais plus complexe
+                  qu'avec Swing. Pas d'équivalent Material moderne.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐⭐ — Écosystème très large (AG Grid, Material UI, Ant
+                  Design, PrimeNG). Mais certaines interactions desktop (D&D
+                  fichiers OS, impression) restent limitées côté navigateur.
+                </td>
+              </tr>
+              <tr>
+                <td>Testabilité et qualité</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — flutter_test intégré au SDK : tests unitaires
+                  Dart + widget tests + integration_test. Simuler des clics,
+                  saisies, drags sans navigateur. CI/CD GitHub Actions officiel
+                  disponible.
+                </td>
+                <td>
+                  ⭐⭐⭐ — TestFX disponible mais peu maintenu. Tests UI
+                  difficiles à paralléliser. Pas de framework de test officiel
+                  Google/Oracle pour le front JavaFX.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐⭐ — Cypress, Playwright, Testing Library — écosystème
+                  de test très mature. Mais les tests E2E web sont plus lents
+                  que les widget tests Flutter (nécessitent un vrai navigateur).
+                </td>
+              </tr>
+              <tr>
+                <td>Disponibilité des compétences</td>
+                <td>
+                  ⭐⭐⭐⭐ — 550K+ développeurs Flutter dans le monde.
+                  Croissance rapide. Accessible aux développeurs Java (syntaxe
+                  Dart proche). Profils disponibles en France.
+                </td>
+                <td>
+                  ⭐⭐ — Compétences JavaFX très rares sur le marché en 2026.
+                  Risque RH majeur pour le recrutement et la maintenance sur le
+                  long terme. JavaFX perçu comme technologie en déclin.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐⭐ — Angular/React : bassin de compétences très large.
+                  Profils nombreux, salaires mieux calibrés. Mais pas de
+                  compétence directement transposable depuis Swing/Java.
+                </td>
+              </tr>
+              <tr>
+                <td>Pérennité technologique</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — Google investit massivement (utilisé pour Flutter
+                  Web, Google Pay, Google Classroom). Roadmap publique active.
+                  Support LTS sur les versions majeures. Dart null-safety depuis
+                  2021.
+                </td>
+                <td>
+                  ⭐⭐ — Oracle a tenté de céder JavaFX à la communauté
+                  (OpenJFX). Roadmap peu visible. Perçu comme technologie de
+                  niche sans adoption de masse par les grands éditeurs.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐⭐ — Angular (Google), React (Meta) — standard
+                  industriel avec des investissements colossaux. Aucun risque de
+                  disparition à l'horizon 10 ans.
+                </td>
+              </tr>
+              <tr>
+                <td>Migration depuis Swing</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — Rupture propre via l'API REST : Flutter remplace
+                  Swing composant par composant sans toucher au back-end EJB
+                  existant. Coexistence possible pendant la transition. Le
+                  modèle mental "widget" est différent mais cohérent.
+                </td>
+                <td>
+                  ⭐⭐⭐ — Même écosystème JVM mais migration à refaire
+                  entièrement malgré tout. Risque de perpétuer des patterns
+                  Swing dans JavaFX. Pas d'avantage décisif sur Flutter pour la
+                  migration.
+                </td>
+                <td>
+                  ⭐⭐ — Rupture technologique totale : Java →
+                  TypeScript/JavaScript, Swing → HTML/CSS, paradigmes
+                  complètement différents. Courbe d'apprentissage la plus longue
+                  pour une équipe Java.
+                </td>
+              </tr>
+              <tr>
+                <td>Conformité RGPD & sécurité</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — Flutter ne stocke pas de données sensibles côté
+                  client. Tout passe par l'API Spring Boot sécurisée. Tokens JWT
+                  en mémoire (pas de localStorage). Modèle de sécurité propre et
+                  auditables.
+                </td>
+                <td>
+                  ⭐⭐⭐ — Même niveau de sécurité atteignable mais nécessite
+                  davantage de configuration manuelle (pas de framework de
+                  sécurité intégré côté JavaFX).
+                </td>
+                <td>
+                  ⭐⭐⭐ — Le navigateur introduit des surfaces d'attaque
+                  supplémentaires (XSS, CSRF, localStorage). Nécessite une
+                  politique CSP stricte et une gestion fine des cookies.
+                  Conformité plus complexe à assurer.
+                </td>
+              </tr>
+              <tr>
+                <td>Accès fonctions OS desktop</td>
+                <td>
+                  ⭐⭐⭐⭐ — Platform channels Dart↔C++ pour les intégrations OS
+                  spécifiques. Impression, clipboard, file system, registres
+                  Windows — accessibles via plugins ou développement natif.
+                  Quelques packages non encore matures sur Windows.
+                </td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — Accès direct aux APIs Java/JVM et donc à
+                  l'ensemble des APIs Windows via JNI. Intégration la plus
+                  facile pour les cas d'impression native Windows ou accès COM.
+                </td>
+                <td>
+                  ⭐⭐ — Accès OS limité aux APIs navigateur (Web API).
+                  Impression via CSS. Pas d'accès natif au système de fichiers
+                  OS (sauf File System Access API, support partiel). Electron
+                  nécessaire pour aller plus loin.
+                </td>
+              </tr>
+              <tr>
+                <td>Coût total de possession (TCO)</td>
+                <td class="win">
+                  ✅ Faible — Open source MIT, 1 codebase pour 5 plateformes,
+                  pas de runtime à licencier, maintenance simplifiée par le
+                  typage fort et les tests intégrés.
+                </td>
+                <td>
+                  ⚠️ Moyen — OpenJFX gratuit mais compétences rares (coût RH
+                  élevé), JVM à maintenir sur chaque poste, écosystème
+                  commercial (SceneBuilder).
+                </td>
+                <td>
+                  ✅ Faible — Open source, large communauté. Mais nécessite un
+                  serveur web, une infrastructure différente du desktop, et des
+                  compétences différentes de l'équipe Java actuelle.
+                </td>
+              </tr>
+              <tr>
+                <td>Intégration back-end Spring Boot</td>
+                <td class="win">
+                  ⭐⭐⭐⭐⭐ — Couplage via API REST uniquement. Contrat OpenAPI
+                  3 partagé. Génération de client Dart depuis le YAML OpenAPI
+                  (openapi-generator). Dio comme client HTTP avec intercepteurs
+                  JWT.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐ — Intégration Java native possible (même JVM). Mais
+                  couplage plus fort risqué. Appels REST via HttpClient Java ou
+                  RestTemplate.
+                </td>
+                <td>
+                  ⭐⭐⭐⭐⭐ — Intégration REST native, génération TypeScript
+                  depuis OpenAPI (ng-openapi-gen, openapi-typescript).
+                  Fetch/Axios bien maîtrisés.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="note" style="margin-top: 14px">
+            <strong>Verdict Smartpoint :</strong> Flutter est le candidat
+            recommandé pour SIGEDAV. Il offre le meilleur équilibre entre
+            performance desktop, richesse des composants, pérennité
+            technologique et coût total de possession. JavaFX présente un risque
+            RH majeur (compétences rares) sans apporter d'avantage décisif sur
+            Flutter. La SPA Web reste une alternative viable si l'accès
+            navigateur devient prioritaire, mais implique une rupture
+            technologique plus profonde pour l'équipe actuelle et des
+            limitations sur les interactions desktop natives.
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ S5 ════ -->
+      <div class="section" id="s5">
+        <div class="s-num">05 — Ergonomie</div>
+        <div class="s-h1">
+          Réponse aux besoins ergonomiques exprimés par l'ADAGP
+        </div>
+        <div class="s-intro">
+          L'ensemble des besoins ergonomiques identifiés pour SIGEDAV est
+          couvert nativement par le SDK Flutter ou par des packages matures
+          disponibles sur pub.dev. Aucun développement de composant from-scratch
+          n'est anticipé.
+        </div>
+
+        <div class="cap-grid" style="margin-bottom: 16px">
+          <div class="cap-card">
+            <div class="cap-icon">🪟</div>
+            <div class="cap-name">Multi-fenêtres</div>
+            <div class="cap-impl">
+              Plusieurs fenêtres Flutter simultanées via
+              <code>window_manager</code>. Chaque fenêtre est un contexte
+              indépendant. Communication inter-fenêtres possible via streams.
+            </div>
+            <span class="cap-tag cap-pkg">Package window_manager</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">🖱</div>
+            <div class="cap-name">Drag & Drop</div>
+            <div class="cap-impl">
+              Natif via <code>Draggable&lt;T&gt;</code> +
+              <code>DragTarget&lt;T&gt;</code> — typé generics, feedback visuel
+              natif, testable. D&D fichiers depuis l'OS via
+              <code>super_drag_and_drop</code>.
+            </div>
+            <span class="cap-tag cap-native">Natif SDK Flutter</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">📋</div>
+            <div class="cap-name">Copier / Coller</div>
+            <div class="cap-impl">
+              API <code>Clipboard</code> Flutter — support Ctrl+C/V automatique
+              dans tous les TextFormField. Clipboard personnalisé pour les
+              objets métier via DataTransfer.
+            </div>
+            <span class="cap-tag cap-native">Natif SDK Flutter</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">🖱</div>
+            <div class="cap-name">Menus contextuels</div>
+            <div class="cap-impl">
+              Via <code>ContextMenuRegion</code> ou
+              <code>GestureDetector</code> + <code>showMenu()</code>. Items
+              dynamiques selon le contexte métier (droits, œuvres, ayants
+              droit).
+            </div>
+            <span class="cap-tag cap-native">Natif SDK Flutter</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">⌨️</div>
+            <div class="cap-name">Raccourcis clavier</div>
+            <div class="cap-impl">
+              Via <code>Shortcuts</code> + <code>Actions</code> — mapping
+              complet Ctrl, Alt, Shift, F1-F12. Raccourcis propres à chaque
+              domaine fonctionnel (Ctrl+N, Ctrl+S, etc.).
+            </div>
+            <span class="cap-tag cap-native">Natif SDK Flutter</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">↔️</div>
+            <div class="cap-name">Redimensionnement</div>
+            <div class="cap-impl">
+              Layout Flutter entièrement responsive via
+              <code>LayoutBuilder</code>, <code>Flexible</code>,
+              <code>Expanded</code>. Panneaux redimensionnables via package
+              <code>split_view</code>.
+            </div>
+            <span class="cap-tag cap-easy">Simple à implémenter</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">☑️</div>
+            <div class="cap-name">Sélection multiple</div>
+            <div class="cap-impl">
+              Via <code>DataTable</code> avec <code>onSelectAll</code> + state
+              Riverpod pour tracking. Sélection par Ctrl+Clic, Shift+Clic —
+              comportement identique aux applications desktop natives.
+            </div>
+            <span class="cap-tag cap-native">Natif SDK Flutter</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">🎨</div>
+            <div class="cap-name">Personnalisation UI</div>
+            <div class="cap-impl">
+              Thème Material 3 centralisé — couleurs, typographies, densités
+              configurables via <code>ThemeData</code>. Thème ADAGP applicable
+              en une ligne. Mode sombre natif.
+            </div>
+            <span class="cap-tag cap-native">Natif SDK Flutter</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">🖥</div>
+            <div class="cap-name">Responsive desktop</div>
+            <div class="cap-impl">
+              Adaptation automatique via <code>LayoutBuilder</code>. Sidebars,
+              grilles, panneaux s'adaptent à la taille de fenêtre. Multi-écrans
+              gérés nativement.
+            </div>
+            <span class="cap-tag cap-native">Natif SDK Flutter</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">📄</div>
+            <div class="cap-name">Gestion documentaire</div>
+            <div class="cap-impl">
+              Upload/download via <code>file_picker</code> +
+              <code>path_provider</code>. Visionneuse PDF intégrée via
+              <code>flutter_pdfview</code>. Intégration GED via API REST Spring
+              Boot.
+            </div>
+            <span class="cap-tag cap-pkg">Packages disponibles</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">🔍</div>
+            <div class="cap-name">Recherche & filtres</div>
+            <div class="cap-impl">
+              Recherche instantanée via <code>StreamBuilder</code> + Riverpod.
+              Filtres multi-critères avec state management. Autocomplétion via
+              <code>flutter_typeahead</code>.
+            </div>
+            <span class="cap-tag cap-easy">Simple à implémenter</span>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">📊</div>
+            <div class="cap-name">Tableaux de données</div>
+            <div class="cap-impl">
+              <code>DataTable2</code> pour tri, pagination, sélection avancée,
+              colonnes fixes. Virtualisation pour les grands volumes. Export
+              CSV/Excel via <code>excel</code> package.
+            </div>
+            <span class="cap-tag cap-pkg">Package DataTable2</span>
+          </div>
+        </div>
+        <div class="note">
+          ✅ 100% des besoins ergonomiques ADAGP sont couverts. 8 sur 12 sont
+          natifs au SDK Flutter sans dépendance externe. Les 4 restants
+          s'appuient sur des packages pub.dev à licence MIT, maintenus
+          activement.
+        </div>
+      </div>
+
+      <!-- ════ S6 ════ -->
+      <div class="section" id="s6">
+        <div class="s-num">06 — Architecture</div>
+        <div class="s-h1">Architecture technique cible proposée</div>
+        <div class="s-intro">
+          L'architecture cible adopte un modèle en couches découplées
+          communicant via API REST. Le découplage total front/back permet des
+          évolutions et des déploiements indépendants par domaine fonctionnel.
+        </div>
+
+        <div class="subsection">
+          <div class="sub-title">Stack en couches — vue détaillée</div>
+          <div class="archi-stack" style="margin-bottom: 22px">
+            <div
+              class="archi-layer"
+              style="background: rgba(182, 221, 16, 0.05)"
+            >
+              <div class="al-label">Couche présentation</div>
+              <div class="al-content">
+                <div class="al-title">
+                  Flutter Desktop Windows — interface native compilée
+                </div>
+                <div class="al-sub">
+                  Remplace intégralement Swing. Exécutable Win32 autonome. State
+                  management Riverpod. Navigation Go Router. Appels API via Dio
+                  (intercepteurs JWT, retry, logs). Thème ADAGP centralisé. Hot
+                  reload en développement.
+                </div>
+                <div class="al-tags">
+                  <span class="badge b-lime">Flutter 3.x</span
+                  ><span class="badge b-lime">Dart</span
+                  ><span class="badge b-lime">Riverpod</span
+                  ><span class="badge b-lime">Go Router</span
+                  ><span class="badge b-lime">Dio</span
+                  ><span class="badge b-lime">Material 3</span>
+                </div>
+              </div>
+            </div>
+            <div class="archi-layer">
+              <div class="al-label">Couche API</div>
+              <div class="al-content">
+                <div class="al-title">
+                  API Gateway REST — Spring Boot 3 + OpenAPI 3 + Spring Security
+                </div>
+                <div class="al-sub">
+                  Point d'entrée unique. JWT stateless intégrable à l'AD ADAGP.
+                  Rate limiting, CORS configuré. Audit log horodaté RGPD.
+                  Documentation Swagger auto-générée et versionnable. Spring
+                  Actuator pour le monitoring.
+                </div>
+                <div class="al-tags">
+                  <span class="badge b-dark">Spring Boot 3</span
+                  ><span class="badge b-dark">Spring Security</span
+                  ><span class="badge b-dark">JWT / LDAP</span
+                  ><span class="badge b-dark">OpenAPI 3</span
+                  ><span class="badge b-dark">Actuator</span>
+                </div>
+              </div>
+            </div>
+            <div class="archi-layer" style="background: #f0f8ff">
+              <div class="al-label">Couche métier</div>
+              <div class="al-content">
+                <div class="al-title">
+                  Modules Spring Boot — découpage par domaines fonctionnels
+                  ADAGP
+                </div>
+                <div class="al-sub">
+                  Remplace les EJB. Modules indépendants : Droits & Œuvres,
+                  Ayants droit, Licences, Reversements, Documents, Reporting,
+                  Administration. Événements domaine pour la traçabilité et
+                  l'audit RGPD. Tests JUnit 5 + Testcontainers.
+                </div>
+                <div class="al-tags">
+                  <span class="badge b-blue">Droits & Œuvres</span
+                  ><span class="badge b-blue">Ayants droit</span
+                  ><span class="badge b-blue">Licences</span
+                  ><span class="badge b-blue">Reversements</span
+                  ><span class="badge b-blue">Documents</span
+                  ><span class="badge b-blue">Reporting</span
+                  ><span class="badge b-blue">Administration</span>
+                </div>
+              </div>
+            </div>
+            <div class="archi-layer" style="background: #f6fff0">
+              <div class="al-label">Couche données</div>
+              <div class="al-content">
+                <div class="al-title">
+                  PostgreSQL 16 — Spring Data JPA — Flyway — Row-Level Security
+                </div>
+                <div class="al-sub">
+                  Remplacement d'Oracle. Row-Level Security pour confidentialité
+                  des données par utilisateur/rôle. Migrations versionnées
+                  Flyway. Audit automatique via Spring Data Auditing. Backup
+                  PgBackRest. Pas de licence commerciale.
+                </div>
+                <div class="al-tags">
+                  <span class="badge b-green">PostgreSQL 16</span
+                  ><span class="badge b-green">Spring Data JPA</span
+                  ><span class="badge b-green">Flyway</span
+                  ><span class="badge b-green">RLS</span
+                  ><span class="badge b-green">PgBackRest</span>
+                </div>
+              </div>
+            </div>
+            <div class="archi-layer">
+              <div class="al-label">Couche transverse</div>
+              <div class="al-content">
+                <div class="al-title">
+                  Sécurité, Traçabilité RGPD, CI/CD, Infrastructure
+                </div>
+                <div class="al-sub">
+                  OAuth2/LDAP/AD. Journal d'audit horodaté de toutes les
+                  opérations sur données personnelles. Alerting Spring Actuator.
+                  CI/CD GitHub Actions (tests, build, déploiement).
+                  Containerisation Docker. Déploiement blue/green zero-downtime.
+                </div>
+                <div class="al-tags">
+                  <span class="badge b-green">OAuth2 / AD</span
+                  ><span class="badge b-green">Audit RGPD</span
+                  ><span class="badge b-green">Docker</span
+                  ><span class="badge b-green">GitHub Actions</span
+                  ><span class="badge b-green">Blue/Green deploy</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="sub-title">
+            Découpage fonctionnel — modules Spring Boot et composants Access
+            remplacés
+          </div>
+          <table class="itable">
+            <thead>
+              <tr>
+                <th>Module / Domaine</th>
+                <th>Responsabilité principale</th>
+                <th>APIs REST exposées</th>
+                <th>Remplace</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge b-lime">Droits & Œuvres</span></td>
+                <td>
+                  Catalogue d'œuvres protégées, métadonnées, catégories, statuts
+                </td>
+                <td>
+                  CRUD œuvres, recherche full-text, filtres avancés, export
+                </td>
+                <td>Module Swing correspondant + fichiers Access</td>
+              </tr>
+              <tr>
+                <td><span class="badge b-lime">Ayants droit</span></td>
+                <td>
+                  Référentiel créateurs, mandats, coordonnées, RIB, documents
+                  justificatifs
+                </td>
+                <td>
+                  CRUD ayants droit, mandats, historique des modifications
+                </td>
+                <td>Module Swing + fichiers Access</td>
+              </tr>
+              <tr>
+                <td><span class="badge b-lime">Licences</span></td>
+                <td>
+                  Gestion licences d'utilisation, périmètres géographiques,
+                  durées, statuts
+                </td>
+                <td>CRUD licences, recherche, statuts, renouvellements</td>
+                <td>Module EJB correspondant</td>
+              </tr>
+              <tr>
+                <td><span class="badge b-lime">Reversements</span></td>
+                <td>
+                  Calcul des reversements, échéances, paiements, rapprochements
+                  comptables
+                </td>
+                <td>Calculs, historique, exports comptables, validation</td>
+                <td>Module EJB + traitements batch Oracle</td>
+              </tr>
+              <tr>
+                <td><span class="badge b-lime">Documents</span></td>
+                <td>
+                  Stockage et association de documents aux dossiers, versioning,
+                  métadonnées
+                </td>
+                <td>Upload, download, métadonnées, recherche, GED</td>
+                <td>Stockage fichiers local non structuré</td>
+              </tr>
+              <tr>
+                <td><span class="badge b-lime">Reporting</span></td>
+                <td>
+                  Tableaux de bord, statistiques, exports PDF/Excel, rapports
+                  planifiés
+                </td>
+                <td>Agrégats, exports, planification, dashboards</td>
+                <td>Rapports Oracle Forms/Reports</td>
+              </tr>
+              <tr>
+                <td><span class="badge b-lime">Administration</span></td>
+                <td>
+                  Utilisateurs, rôles RBAC, droits d'accès, paramétrage, audit
+                  log
+                </td>
+                <td>CRUD users, RBAC, logs RGPD, paramétrage</td>
+                <td>Administration manuelle BDD Oracle</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════ S7 ════ -->
+      <div class="section" id="s7">
+        <div class="s-num">07 — Stratégie</div>
+        <div class="s-h1">
+          Stratégie de transformation et réduction des risques
+        </div>
+        <div class="s-intro">
+          La migration est conduite de manière strictement progressive et
+          incrémentale. Aucun big bang technologique. Chaque étape livre de la
+          valeur mesurable et valide les choix avant d'engager les suivantes.
+        </div>
+
+        <div class="roadmap">
+          <div class="rm-phase">
+            <div class="rm-left">
+              <div class="rm-step">Étape 1</div>
+              <div class="rm-title">Audit & cadrage</div>
+              <div class="rm-dur">⏱ 4 semaines</div>
+            </div>
+            <div class="rm-right">
+              <div class="rm-task">
+                Audit exhaustif du code Java / Swing / EJB
+              </div>
+              <div class="rm-task">
+                Cartographie des flux Oracle et fichiers Access
+              </div>
+              <div class="rm-task">
+                Identification des règles métier implicites dans l'UI Swing
+              </div>
+              <div class="rm-task">
+                Définition du découpage en domaines fonctionnels
+              </div>
+              <div class="rm-task">
+                Ateliers UX avec les utilisateurs référents ADAGP
+              </div>
+              <div class="rm-task">
+                Validation définitive des choix technologiques
+              </div>
+            </div>
+          </div>
+          <div class="rm-phase">
+            <div class="rm-left">
+              <div class="rm-step">Étape 2</div>
+              <div class="rm-title">Architecture cible</div>
+              <div class="rm-dur">⏱ 3 semaines</div>
+            </div>
+            <div class="rm-right">
+              <div class="rm-task">
+                Conception modèle de données cible PostgreSQL
+              </div>
+              <div class="rm-task">
+                Définition contrat API REST (OpenAPI YAML)
+              </div>
+              <div class="rm-task">
+                Architecture sécurité (JWT, RBAC, LDAP/AD ADAGP)
+              </div>
+              <div class="rm-task">
+                Plan de migration Oracle → PostgreSQL (scripts Flyway)
+              </div>
+              <div class="rm-task">
+                Stratégie reprise fichiers Access (inventaire + scripts)
+              </div>
+              <div class="rm-task">
+                Validation architecture avec direction technique ADAGP
+              </div>
+            </div>
+          </div>
+          <div class="rm-phase">
+            <div class="rm-left">
+              <div class="rm-step">Étape 3</div>
+              <div class="rm-title">Socle technique</div>
+              <div class="rm-dur">⏱ 5 semaines</div>
+            </div>
+            <div class="rm-right">
+              <div class="rm-task">
+                Init projet Spring Boot 3 + Java 21 + CI/CD GitHub Actions
+              </div>
+              <div class="rm-task">
+                Init projet Flutter Desktop + structure Riverpod
+              </div>
+              <div class="rm-task">
+                PostgreSQL + Flyway + premières migrations
+              </div>
+              <div class="rm-task">
+                Authentification JWT + intégration AD/LDAP ADAGP
+              </div>
+              <div class="rm-task">
+                Formation équipe Dart/Flutter (2 jours) + Java 21
+              </div>
+              <div class="rm-task">
+                Proof of concept — 1 module complet end-to-end
+              </div>
+            </div>
+          </div>
+          <div class="rm-phase">
+            <div class="rm-left">
+              <div class="rm-step">Étape 4</div>
+              <div class="rm-title">Migration progressive</div>
+              <div class="rm-dur">⏱ 6 à 9 mois</div>
+            </div>
+            <div class="rm-right">
+              <div class="rm-task">
+                Migration domaine par domaine (priorité métier ADAGP)
+              </div>
+              <div class="rm-task">
+                Coexistence Swing ↔ Flutter via API REST pendant transition
+              </div>
+              <div class="rm-task">
+                Migration données Oracle → PostgreSQL par lots
+              </div>
+              <div class="rm-task">
+                Reprise des fichiers Access — migration vers BDD
+              </div>
+              <div class="rm-task">
+                Tests de non-régression à chaque livraison (2 semaines)
+              </div>
+              <div class="rm-task">
+                Démos fin de sprint aux utilisateurs ADAGP
+              </div>
+            </div>
+          </div>
+          <div class="rm-phase">
+            <div class="rm-left">
+              <div class="rm-step">Étape 5</div>
+              <div class="rm-title">Décommissionnement</div>
+              <div class="rm-dur">⏱ 3 semaines</div>
+            </div>
+            <div class="rm-right">
+              <div class="rm-task">
+                Validation fonctionnelle complète avec les utilisateurs
+              </div>
+              <div class="rm-task">
+                Archivage et décommissionnement Oracle + JBoss
+              </div>
+              <div class="rm-task">
+                Formation utilisateurs sur la nouvelle interface Flutter
+              </div>
+              <div class="rm-task">
+                Documentation technique et fonctionnelle finale
+              </div>
+              <div class="rm-task">
+                Mise en place du support et de la maintenance
+              </div>
+              <div class="rm-task">
+                Bilan et mesure des gains (TCO, performance, satisfaction)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="sub-title">
+            Analyse des risques majeurs et mesures de sécurisation
+          </div>
+          <table class="itable">
+            <thead>
+              <tr>
+                <th>Risque</th>
+                <th>Probabilité</th>
+                <th>Impact</th>
+                <th>Mesures de sécurisation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>Migration Oracle → PostgreSQL</strong><br /><span
+                    style="font-size: 11px; color: var(--sp-muted)"
+                    >Perte ou corruption lors de la migration des données</span
+                  >
+                </td>
+                <td><span class="sev-h sev-m">🟠 Moyen</span></td>
+                <td><span class="sev-h sev-c">🔴 Critique</span></td>
+                <td>
+                  Dual-write pendant la phase de migration + comparaison
+                  automatisée. Scripts Flyway versionnés. Tests de cohérence.
+                  Rollback plan documenté pour chaque batch.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Migration EJB → Spring Boot</strong><br /><span
+                    style="font-size: 11px; color: var(--sp-muted)"
+                    >Règles métier implicites non documentées perdues</span
+                  >
+                </td>
+                <td><span class="sev-h sev-c">🔴 Élevé</span></td>
+                <td><span class="sev-h sev-c">🔴 Critique</span></td>
+                <td>
+                  Audit exhaustif code EJB en étape 1. Tests de non-régression
+                  basés sur les comportements existants. Validation des règles
+                  métier avec experts fonctionnels ADAGP à chaque domaine.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Reprise ergonomique</strong><br /><span
+                    style="font-size: 11px; color: var(--sp-muted)"
+                    >Résistance des utilisateurs habitués à Swing</span
+                  >
+                </td>
+                <td><span class="sev-h sev-m">🟠 Moyen</span></td>
+                <td><span class="sev-h sev-m">🟠 Majeur</span></td>
+                <td>
+                  Ateliers UX dès étape 1. Prototypes Flutter validés avant
+                  développement. Formation progressive. Période de coexistence
+                  Swing/Flutter. Feedback continu chaque sprint.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Continuité de service</strong><br /><span
+                    style="font-size: 11px; color: var(--sp-muted)"
+                    >Indisponibilité pendant les basculements</span
+                  >
+                </td>
+                <td>
+                  <span
+                    class="sev-h"
+                    style="background: #e1f5ee; color: #085041"
+                    >🟢 Faible</span
+                  >
+                </td>
+                <td><span class="sev-h sev-c">🔴 Critique</span></td>
+                <td>
+                  Migration progressive — jamais de big bang. Blue/green
+                  deployment. Basculements planifiés hors heures ouvrées. Plan
+                  de rollback documenté pour chaque étape.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Compétences Flutter</strong><br /><span
+                    style="font-size: 11px; color: var(--sp-muted)"
+                    >Courbe d'apprentissage Dart / Flutter Desktop</span
+                  >
+                </td>
+                <td><span class="sev-h sev-m">🟠 Moyen</span></td>
+                <td><span class="sev-h sev-m">🟠 Majeur</span></td>
+                <td>
+                  Formation dédiée 2 jours en étape 3. PoC avant production.
+                  Accompagnement expert Flutter Smartpoint en phase de
+                  démarrage. Revues de code hebdomadaires.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Fichiers Access</strong><br /><span
+                    style="font-size: 11px; color: var(--sp-muted)"
+                    >Données critiques dans .mdb/.accdb non structurés</span
+                  >
+                </td>
+                <td><span class="sev-h sev-c">🔴 Élevé</span></td>
+                <td><span class="sev-h sev-m">🟠 Majeur</span></td>
+                <td>
+                  Inventaire complet étape 1. Scripts d'extraction et
+                  validation. Migration priorisée dans les premières sprints
+                  étape 4. Archivage systématique des fichiers sources.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════ S8 ════ -->
+      <div class="section" id="s8">
+        <div class="s-num">08 — Conclusion</div>
+        <div class="s-h1">Conclusion et recommandations préliminaires</div>
+        <div class="s-intro">
+          Cette pré-étude établit un cadrage architectural fondé sur une analyse
+          rigoureuse des irritants et une évaluation comparative approfondie des
+          technologies candidates. Les recommandations ci-dessous sont
+          préliminaires et seront affinées lors de la mission d'audit.
+        </div>
+
+        <div class="g2" style="margin-bottom: 22px">
+          <div>
+            <div class="sub-title">Synthèse des constats</div>
+            <div class="card">
+              <div class="card-body">
+                <ul class="blist check">
+                  <li>
+                    <strong
+                      >La dette technique est critique et urgente :</strong
+                    >
+                    Java 8 EoL + EJB + Oracle constituent un risque de sécurité,
+                    de performance et de coût croissant — l'inaction n'est plus
+                    une option viable
+                  </li>
+                  <li>
+                    <strong>Flutter est le meilleur choix front-end :</strong>
+                    performance desktop native, richesse des composants,
+                    pérennité Google, TCO faible — l'analyse comparative sur 13
+                    critères le confirme face à JavaFX et aux SPA Web
+                  </li>
+                  <li>
+                    <strong
+                      >Spring Boot 3 + PostgreSQL sont le standard du marché
+                      :</strong
+                    >
+                    stack éprouvée, open source, sans licence éditeur, avec un
+                    bassin de compétences très large en France
+                  </li>
+                  <li>
+                    <strong
+                      >La migration progressive est la seule trajectoire
+                      acceptable :</strong
+                    >
+                    un big bang sur un système de production critique est un
+                    risque inacceptable — chaque phase doit livrer de la valeur
+                    indépendamment
+                  </li>
+                  <li>
+                    <strong
+                      >Les fichiers Access sont la priorité numéro 1 :</strong
+                    >
+                    ils constituent le risque de perte de données métier le plus
+                    élevé et doivent être traités en premier
+                  </li>
+                  <li>
+                    <strong
+                      >La conformité RGPD sera atteinte by design :</strong
+                    >
+                    l'architecture cible (RLS PostgreSQL, JWT, audit log Spring)
+                    intègre la conformité à chaque couche sans surcouche
+                    ultérieure
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="sub-title">Prochaines étapes recommandées</div>
+            <div class="card">
+              <div class="card-body">
+                <div class="a-item">
+                  <div class="a-dot"></div>
+                  <div>
+                    <div class="a-main">Semaines 1–2 — Kick-off & accès</div>
+                    <div class="a-sub">
+                      Constitution de l'équipe, accès au code source et aux
+                      environnements, démarrage de l'audit technique EJB/Swing
+                    </div>
+                  </div>
+                </div>
+                <div class="a-item">
+                  <div class="a-dot"></div>
+                  <div>
+                    <div class="a-main">Semaines 3–4 — Inventaire & UX</div>
+                    <div class="a-sub">
+                      Inventaire fichiers Access, cartographie flux Oracle,
+                      ateliers UX avec les utilisateurs référents ADAGP
+                    </div>
+                  </div>
+                </div>
+                <div class="a-item">
+                  <div class="a-dot"></div>
+                  <div>
+                    <div class="a-main">Semaines 5–6 — Formation & PoC</div>
+                    <div class="a-sub">
+                      Formation Dart/Flutter 2 jours, Java 21, démarrage du
+                      proof of concept 1 module end-to-end Flutter + Spring Boot
+                    </div>
+                  </div>
+                </div>
+                <div class="a-item">
+                  <div class="a-dot"></div>
+                  <div>
+                    <div class="a-main">Semaine 7 — Go / No-Go</div>
+                    <div class="a-sub">
+                      Présentation des conclusions d'audit, validation de
+                      l'architecture cible avec la direction technique ADAGP,
+                      décision de lancement Phase 2
+                    </div>
+                  </div>
+                </div>
+                <div class="a-item">
+                  <div class="a-dot"></div>
+                  <div>
+                    <div class="a-main">Sprint réguliers Phase 2-5</div>
+                    <div class="a-sub">
+                      Sprints de 2 semaines avec démo et validation
+                      fonctionnelle à chaque fin de sprint — livraison
+                      incrémentale continue
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ CONCLUSION ════ -->
+      <div class="conclusion">
+        <div class="concl-glow"></div>
+        <div class="concl-h2">Message final aux parties prenantes ADAGP</div>
+        <div class="concl-sub">
+          Ce document constitue une pré-étude et non un document d'architecture
+          définitif. Les choix technologiques présentés sont des recommandations
+          préliminaires fondées sur les informations disponibles à ce stade et
+          sur l'expertise Smartpoint en modernisation de SI.
+        </div>
+        <div class="concl-grid">
+          <div class="concl-card">
+            <h4>Ce que confirme cette pré-étude</h4>
+            <ul>
+              <li>
+                La dette technique de SIGEDAV rend la modernisation
+                incontournable à court terme
+              </li>
+              <li>
+                Flutter est une technologie mature et pertinente pour remplacer
+                Swing sur Windows
+              </li>
+              <li>
+                Spring Boot 3 + PostgreSQL constituent un socle back-end solide
+                et souverain
+              </li>
+              <li>
+                Une migration progressive par domaines est la seule trajectoire
+                acceptable
+              </li>
+              <li>
+                L'ensemble des besoins ergonomiques ADAGP est couvert par
+                Flutter nativement
+              </li>
+            </ul>
+          </div>
+          <div class="concl-card">
+            <h4>Ce qui sera précisé lors de l'audit</h4>
+            <ul>
+              <li>
+                Le périmètre exact des règles métier à migrer depuis les EJB
+              </li>
+              <li>La complexité réelle de la migration Oracle → PostgreSQL</li>
+              <li>
+                L'inventaire exhaustif des fichiers Access et le volume de
+                données
+              </li>
+              <li>
+                La priorisation définitive des domaines fonctionnels à migrer
+              </li>
+              <li>
+                Les intégrations OS Windows spécifiques nécessitant des platform
+                channels
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="final-msg">
+          « Les conclusions définitives seront consolidées durant la mission
+          d'audit et de cadrage afin de confirmer les choix technologiques les
+          plus adaptés aux enjeux métier, techniques et organisationnels de
+          l'ADAGP. La présente pré-étude a vocation à poser les bases d'une
+          réflexion structurée et à servir de point de départ au dialogue avec
+          les équipes de l'ADAGP. »
+        </div>
+      </div>
+    </div>
+    <!-- /page-wrap -->
+
+    <!-- FOOTER -->
+    <div class="sp-footer">
+      <img
+        src="https://www.smartpoint.fr/wp-content/uploads/cropped-LOGO_SMARTPOINT-1.png"
+        alt="Smartpoint"
+      />
+      <span class="sp-footer-text"
+        >Smartpoint — Pure-player Data & IA à Paris · smartpoint.fr · Document
+        confidentiel ADAGP / SIGEDAV</span
+      >
+    </div>
+  </body>
+</html>
